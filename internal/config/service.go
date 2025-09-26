@@ -8,7 +8,7 @@ import (
 var (
 	configs      = make(map[string]Configuration)
 	configGroups = make(map[string]ConfigurationGroup)
-	mu           sync.Mutex // Mutex (Mutual Exclusion)
+	mu           sync.Mutex
 )
 
 type ConfigService struct{}
@@ -55,4 +55,40 @@ func (s *ConfigService) DeleteConfiguration(id, version string) error {
 	return nil
 }
 
-// TODO: Kasnije ćemo ovde dodati funkcije i za ConfigurationGroup (Create, Get, Delete...).
+func (s *ConfigService) CreateConfigurationGroup(group ConfigurationGroup) (ConfigurationGroup, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	key := fmt.Sprintf("%s:%s", group.ID, group.Version)
+	if _, exists := configGroups[key]; exists {
+		return ConfigurationGroup{}, fmt.Errorf("grupa sa ID-jem %s i verzijom %s već postoji", group.ID, group.Version)
+	}
+
+	configGroups[key] = group
+	return group, nil
+}
+
+func (s *ConfigService) GetConfigurationGroup(id, version string) (ConfigurationGroup, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	key := fmt.Sprintf("%s:%s", id, version)
+	group, exists := configGroups[key]
+	if !exists {
+		return ConfigurationGroup{}, fmt.Errorf("grupa sa ID-jem %s i verzijom %s nije pronađena", id, version)
+	}
+	return group, nil
+}
+
+func (s *ConfigService) DeleteConfigurationGroup(id, version string) error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	key := fmt.Sprintf("%s:%s", id, version)
+	if _, exists := configGroups[key]; !exists {
+		return fmt.Errorf("grupa sa ID-jem %s i verzijom %s nije pronađena", id, version)
+	}
+
+	delete(configGroups, key)
+	return nil
+}
