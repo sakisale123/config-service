@@ -55,6 +55,27 @@ func (s *ConfigService) DeleteConfiguration(id, version string) error {
 	return nil
 }
 
+func (s *ConfigService) SearchConfigurationsByLabels(labelsToSearch map[string]string) ([]Configuration, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	var result []Configuration
+	for _, config := range configs {
+		matches := true
+		for searchKey, searchValue := range labelsToSearch {
+			value, ok := config.Labels[searchKey]
+			if !ok || value != searchValue {
+				matches = false
+				break
+			}
+		}
+		if matches {
+			result = append(result, config)
+		}
+	}
+	return result, nil
+}
+
 func (s *ConfigService) CreateConfigurationGroup(group ConfigurationGroup) (ConfigurationGroup, error) {
 	mu.Lock()
 	defer mu.Unlock()

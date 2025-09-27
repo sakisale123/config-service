@@ -21,10 +21,12 @@ func main() {
 	router.HandleFunc("/configs", configHandler.CreateConfigurationHandler).Methods("POST")
 	router.HandleFunc("/configs/{id}/versions/{version}", configHandler.GetConfigurationHandler).Methods("GET")
 	router.HandleFunc("/configs/{id}/versions/{version}", configHandler.DeleteConfigurationHandler).Methods("DELETE")
+	router.HandleFunc("/search/configs", configHandler.SearchConfigurationsHandler).Methods("GET") // nova ruta
 
 	router.HandleFunc("/groups", configHandler.CreateConfigurationGroupHandler).Methods("POST")
 	router.HandleFunc("/groups/{id}/versions/{version}", configHandler.GetConfigurationGroupHandler).Methods("GET")
 	router.HandleFunc("/groups/{id}/versions/{version}", configHandler.DeleteConfigurationGroupHandler).Methods("DELETE")
+	
 
 	srv := &http.Server{
 		Addr:    ":8080",

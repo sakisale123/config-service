@@ -59,6 +59,31 @@ func (h *ConfigHandler) DeleteConfigurationHandler(w http.ResponseWriter, r *htt
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// ubacio hendler za pretragu
+func (h *ConfigHandler) SearchConfigurationsHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	labelsToSearch := make(map[string]string)
+	for key, values := range query {
+		if len(values) > 0 {
+			labelsToSearch[key] = values[0]
+		}
+	}
+
+	if len(labelsToSearch) == 0 {
+		http.Error(w, "Niste uneli nijednu labelu za pretragu", http.StatusBadRequest)
+		return
+	}
+
+	configs, err := h.service.SearchConfigurationsByLabels(labelsToSearch)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(configs)
+}
+
 // HENDLERI ZA KONFIGURACIONE GRUPE
 
 func (h *ConfigHandler) CreateConfigurationGroupHandler(w http.ResponseWriter, r *http.Request) {
