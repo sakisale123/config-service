@@ -24,7 +24,9 @@ func (h *ConfigHandler) CreateConfigurationHandler(w http.ResponseWriter, r *htt
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	config.ID = uuid.New().String()
+	if config.ID == "" {
+		config.ID = uuid.New().String()
+	}
 	createdConfig, err := h.service.CreateConfiguration(config)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)

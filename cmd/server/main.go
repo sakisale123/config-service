@@ -11,12 +11,15 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/sakisale123/config-service/internal/config"
+	"github.com/sakisale123/config-service/internal/middleware"
+	"golang.org/x/time/rate"
 )
 
 func main() {
 	router := mux.NewRouter()
 	configService := config.NewConfigService()
 	configHandler := config.NewConfigHandler(configService)
+	limiter := rate.NewLimiter(1, 3)
 
 	router.HandleFunc("/configs", configHandler.CreateConfigurationHandler).Methods("POST")
 	router.HandleFunc("/configs/{id}/versions/{version}", configHandler.GetConfigurationHandler).Methods("GET")
@@ -26,11 +29,10 @@ func main() {
 	router.HandleFunc("/groups", configHandler.CreateConfigurationGroupHandler).Methods("POST")
 	router.HandleFunc("/groups/{id}/versions/{version}", configHandler.GetConfigurationGroupHandler).Methods("GET")
 	router.HandleFunc("/groups/{id}/versions/{version}", configHandler.DeleteConfigurationGroupHandler).Methods("DELETE")
-	
 
 	srv := &http.Server{
 		Addr:    ":8080",
-		Handler: router,
+		Handler: middleware.RateLimitMiddleware(limiter)(router),
 	}
 
 	go func() {
