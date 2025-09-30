@@ -21,14 +21,27 @@ func main() {
 	configHandler := config.NewConfigHandler(configService)
 	limiter := rate.NewLimiter(1, 3)
 
+	// --- KONFIGURACIJE ---
 	router.HandleFunc("/configs", configHandler.CreateConfigurationHandler).Methods("POST")
-	router.HandleFunc("/configs/{id}/versions/{version}", configHandler.GetConfigurationHandler).Methods("GET")
-	router.HandleFunc("/configs/{id}/versions/{version}", configHandler.DeleteConfigurationHandler).Methods("DELETE")
-	router.HandleFunc("/search/configs", configHandler.SearchConfigurationsHandler).Methods("GET") // nova ruta
 
+	// ISPRAVLJENE RUTE: Koriste /configs/{id}/{version}
+	router.HandleFunc("/configs/{id}/{version}", configHandler.GetConfigurationHandler).Methods("GET")
+	router.HandleFunc("/configs/{id}/{version}", configHandler.UpdateConfigurationHandler).Methods("PUT")
+	router.HandleFunc("/configs/{id}/{version}", configHandler.DeleteConfigurationHandler).Methods("DELETE")
+
+	// RUTA ZA PRETRAGU KONFIGURACIJA
+	router.HandleFunc("/configs/search", configHandler.SearchConfigurationsHandler).Methods("GET")
+
+	// --- GRUPE KONFIGURACIJA ---
 	router.HandleFunc("/groups", configHandler.CreateConfigurationGroupHandler).Methods("POST")
-	router.HandleFunc("/groups/{id}/versions/{version}", configHandler.GetConfigurationGroupHandler).Methods("GET")
-	router.HandleFunc("/groups/{id}/versions/{version}", configHandler.DeleteConfigurationGroupHandler).Methods("DELETE")
+
+	// ISPRAVLJENE RUTE: Koriste /groups/{id}/{version}
+	router.HandleFunc("/groups/{id}/{version}", configHandler.GetConfigurationGroupHandler).Methods("GET")
+	router.HandleFunc("/groups/{id}/{version}", configHandler.UpdateConfigurationGroupHandler).Methods("PUT")
+	router.HandleFunc("/groups/{id}/{version}", configHandler.DeleteConfigurationGroupHandler).Methods("DELETE")
+
+	// RUTA ZA PRETRAGU GRUPA
+	router.HandleFunc("/groups/search", configHandler.SearchConfigurationGroupsHandler).Methods("GET")
 
 	srv := &http.Server{
 		Addr:    ":8080",
