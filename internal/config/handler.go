@@ -61,8 +61,13 @@ func (h *ConfigHandler) DeleteConfigurationHandler(w http.ResponseWriter, r *htt
 	vars := mux.Vars(r)
 	id := vars["id"]
 	version := vars["version"]
+
 	if err := h.service.DeleteConfiguration(id, version); err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		if strings.Contains(err.Error(), "nije pronađena") {
+			http.Error(w, err.Error(), http.StatusNotFound) // Vraća 404
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -108,15 +113,19 @@ func (h *ConfigHandler) UpdateConfigurationHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	// Obavezna provera konzistentnosti ID-jeva iz URL-a i tela zahteva
+	// Provera konzistentnosti ID-jeva iz URL-a i tela zahteva
 	if config.ID != id || config.Version != version {
 		http.Error(w, "ID ili verzija u telu zahteva se ne poklapaju sa onima u URL-u", http.StatusBadRequest)
 		return
 	}
 
-	// Pretpostavlja se da service.UpdateConfiguration(config) postoji i da je implementiran u service.go
 	if err := h.service.UpdateConfiguration(config); err != nil {
-		// Ako servis vrati grešku 'nije pronađeno' (koju morate rukovati u service.go)
+		// 💥 KLJUČNA ISPRAVKA: Rukovanje 404 greškom
+		if strings.Contains(err.Error(), "nije pronađena") {
+			http.Error(w, err.Error(), http.StatusNotFound) // Vraća 404
+			return
+		}
+		// Za sve ostale greške (npr. Consul pao), vraća 500
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
