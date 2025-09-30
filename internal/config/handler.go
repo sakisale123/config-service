@@ -120,7 +120,7 @@ func (h *ConfigHandler) UpdateConfigurationHandler(w http.ResponseWriter, r *htt
 	}
 
 	if err := h.service.UpdateConfiguration(config); err != nil {
-		// 💥 KLJUČNA ISPRAVKA: Rukovanje 404 greškom
+		//Rukovanje 404 greškom
 		if strings.Contains(err.Error(), "nije pronađena") {
 			http.Error(w, err.Error(), http.StatusNotFound) // Vraća 404
 			return

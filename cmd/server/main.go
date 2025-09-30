@@ -24,7 +24,7 @@ func main() {
 	// --- KONFIGURACIJE ---
 	router.HandleFunc("/configs", configHandler.CreateConfigurationHandler).Methods("POST")
 
-	// ISPRAVLJENE RUTE: Koriste /configs/{id}/{version}
+	//Koriste /configs/{id}/{version}
 	router.HandleFunc("/configs/{id}/{version}", configHandler.GetConfigurationHandler).Methods("GET")
 	router.HandleFunc("/configs/{id}/{version}", configHandler.UpdateConfigurationHandler).Methods("PUT")
 	router.HandleFunc("/configs/{id}/{version}", configHandler.DeleteConfigurationHandler).Methods("DELETE")
